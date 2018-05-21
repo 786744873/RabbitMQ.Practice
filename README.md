@@ -362,4 +362,6 @@ channel.BasicConsume(queue: "rpc_queue", autoAck: false, consumer: consumer);
 
 >参考资料：
 [RabbitMQ Tutorials](http://www.rabbitmq.com/getstarted.html)
-[Demo路径——RabbitMQ](https://github.com/yanshengjie/RabbitMQ)
+[Demo路径——RabbitMQ](https://github.com/786744873/RabbitMQ.Practice)
+
+本文档copy自：https://github.com/yanshengjie/RabbitMQ/edit/master/README.md
