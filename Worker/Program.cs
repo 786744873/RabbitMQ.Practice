@@ -16,6 +16,7 @@ namespace Worker
             {
                 using (IModel channel = connection.CreateModel())
                 {
+                    //声明队列
                     channel.QueueDeclare(
                         queue: "task_queue",
                         durable: true,
@@ -23,12 +24,13 @@ namespace Worker
                         autoDelete: false,
                         arguments: null);
 
+                    //限制一次推送一条消息
                     channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
                     Console.WriteLine(" [*] Waiting for messages.");
 
+                    //定义消费者规则
                     EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
-
                     consumer.Received += (mdoel, ea) =>
                     {
                         Byte[] body = ea.Body;
@@ -39,9 +41,11 @@ namespace Worker
 
                         Console.WriteLine(" [x] Done");
 
+                        //ACK手动确认
                         channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     };
 
+                    //将消费者与队列进行绑定
                     channel.BasicConsume(queue: "task_queue", autoAck: false, consumer: consumer);
 
                     Console.WriteLine(" Press [enter] to exit.");

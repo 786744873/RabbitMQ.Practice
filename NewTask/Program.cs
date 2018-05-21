@@ -29,6 +29,7 @@ namespace NewTask
                     IBasicProperties properties = channel.CreateBasicProperties();
                     properties.Persistent = true;
 
+                    //消息推送（）
                     channel.BasicPublish(
                     exchange: "",
                     routingKey: "task_queue",

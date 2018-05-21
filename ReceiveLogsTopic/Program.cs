@@ -3,7 +3,7 @@ using RabbitMQ.Client.Events;
 using System;
 using System.Text;
 
-namespace ReceiveLogs
+namespace ReceiveLogsTopic
 {
     class Program
     {
@@ -20,26 +20,25 @@ namespace ReceiveLogs
             {
                 using (IModel channel = connection.CreateModel())
                 {
-                    //声明扇形交换机
-                    channel.ExchangeDeclare(exchange: "logs", type: "fanout");
+                    //声明交换机
+                    channel.ExchangeDeclare(exchange: "topic_logs", type: "topic");
 
-                    //将非实时队列绑定到交换机
-                    string queueName = channel.QueueDeclare().QueueName;
-                    channel.QueueBind(queue: queueName, exchange: "logs", routingKey: "");
+                    var queueName = channel.QueueDeclare().QueueName;
 
-                    Console.WriteLine(" [*] Waiting for logs.");
+                    //推送消息
+                    channel.QueueBind(queue: queueName, exchange: "topic_logs", routingKey: "*.info", arguments: null);
 
-                    //定义消费者规则
                     EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
                     consumer.Received += (model, ea) =>
                     {
                         Byte[] body = ea.Body;
                         String message = Encoding.UTF8.GetString(body);
-                        Console.WriteLine(" [x] {0}", message);
+                        String routingKey = ea.RoutingKey;
+                        Console.WriteLine(" [x] Received '{0}':'{1}'", routingKey, message);
                     };
 
                     //将消费者与队列进行绑定
-                    channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
+                    channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
 
                     Console.WriteLine(" Press [enter] to exit.");
                     Console.ReadLine();
