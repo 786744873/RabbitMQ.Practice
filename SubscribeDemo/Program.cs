@@ -14,7 +14,7 @@ namespace SubscribeDemo
             String routeKeyName = "wytRouteKey";
 
             ConnectionFactory factory = new ConnectionFactory();
-            factory.HostName = "tcp://server.natappfree.cc:32910";
+            factory.HostName = "localhost";
             factory.Port = 5672;
             factory.VirtualHost = "/wyt";
             factory.UserName = "wyt";
@@ -25,9 +25,9 @@ namespace SubscribeDemo
                 using (IModel channel=connection.CreateModel())
                 {
                     //声明扇形交换机
-                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct");
+                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct",durable:true,autoDelete:false,arguments:null);
 
-                    channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
                     channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routeKeyName, arguments: null);
 

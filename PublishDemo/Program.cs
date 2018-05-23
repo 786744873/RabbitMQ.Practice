@@ -9,7 +9,6 @@ namespace PublishDemo
     {
         static void Main(string[] args)
         {
-            String queueName = "wytQueue";
             String exchangeName = "wytExchange";
             String routeKey = "wytRouteKey";
             String message = "Hello World!";
@@ -26,7 +25,7 @@ namespace PublishDemo
                 using (IModel channel=connection.CreateModel())
                 {
                     //声明交换机（名称：log，类型：fanout（扇出））
-                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct");
+                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct",durable:true,autoDelete:false,arguments:null);
 
                     Byte[] body = Encoding.UTF8.GetBytes(message);
 
