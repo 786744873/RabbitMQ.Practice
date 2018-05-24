@@ -14,7 +14,7 @@ namespace ColonyConsumer
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.HostName = "192.168.63.133";
-            factory.Port = 6572;
+            factory.Port = 5672;
             factory.VirtualHost = "/wyt";
             factory.UserName = "wyt";
             factory.Password = "wyt";
@@ -42,6 +42,8 @@ namespace ColonyConsumer
 
                     channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
 
+                    Console.WriteLine("等待接收消息");
+                    Console.ReadKey();
                 }
             }
         }

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using RabbitMQ.Client;
+using System;
 using System.Text;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
-namespace ColonyProduct
+namespace ExceptionHandlerProduct
 {
     class Program
     {
@@ -19,9 +18,9 @@ namespace ColonyProduct
             factory.UserName = "wyt";
             factory.Password = "wyt";
 
-            using (IConnection connection=factory.CreateConnection())
+            using (IConnection connection = factory.CreateConnection())
             {
-                using (IModel channel=connection.CreateModel())
+                using (IModel channel = connection.CreateModel())
                 {
                     channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct, durable: true, autoDelete: false, arguments: null);
 
@@ -34,7 +33,7 @@ namespace ColonyProduct
 
                     for (int i = 0; i < 10; i++)
                     {
-                        Byte[] body = Encoding.UTF8.GetBytes("Hello World -- "+i);
+                        Byte[] body = Encoding.UTF8.GetBytes("Hello World -- " + i);
 
                         channel.BasicPublish(exchange: exchangeName, routingKey: String.Empty, basicProperties: properties, body: body);
                     }
