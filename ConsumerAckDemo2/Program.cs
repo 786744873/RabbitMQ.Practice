@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace SubscribeDemo
+namespace ConsumerAckDemo2
 {
     class Program
     {
         static void Main(string[] args)
         {
-            String queueName = "wytQueue";
             String exchangeName = "wytExchange";
+            String queueName = "wytQueue";
             String routeKeyName = "wytRouteKey";
 
             ConnectionFactory factory = new ConnectionFactory();
@@ -20,16 +21,18 @@ namespace SubscribeDemo
             factory.UserName = "wyt";
             factory.Password = "wyt";
 
-            using (IConnection connection=factory.CreateConnection())
+            using (IConnection connection = factory.CreateConnection())
             {
-                using (IModel channel=connection.CreateModel())
+                using (IModel channel = connection.CreateModel())
                 {
-                    //声明扇形交换机
-                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct",durable:false,autoDelete:false,arguments:null);
+                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct", durable: true, autoDelete: false, arguments: null);
 
-                    channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
                     channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routeKeyName, arguments: null);
+
+                    channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+
 
                     EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
                     consumer.Received += (model, ea) =>
@@ -37,13 +40,16 @@ namespace SubscribeDemo
                         Byte[] body = ea.Body;
                         String message = Encoding.UTF8.GetString(body);
                         Console.WriteLine(" [x] {0}", message);
+
+                        //Thread.Sleep(1000);
+
+                        //channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     };
 
-                    channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
+                    channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
 
                     Console.WriteLine(" Press [enter] to exit.");
                     Console.ReadLine();
-
                 }
             }
         }

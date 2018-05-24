@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace PublishDemo
+namespace FanoutProduct
 {
     class Program
     {
         static void Main(string[] args)
         {
-            String queueName = "wytQueue";
             String exchangeName = "wytExchange";
-            String routeKeyName = "wytRouteKey";
             String message = "Hello World!";
 
             ConnectionFactory factory = new ConnectionFactory();
@@ -25,17 +25,17 @@ namespace PublishDemo
             {
                 using (IModel channel=connection.CreateModel())
                 {
-                    //声明交换机（名称：log，类型：fanout（扇出））
-                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct",durable:false,autoDelete:false,arguments:null);
+                    channel.ExchangeDeclare(exchange: exchangeName, type: "fanout", durable: true, autoDelete: false, arguments: null);
 
-                    //channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
-                    //channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routeKeyName, arguments: null);
+                    IBasicProperties properties = channel.CreateBasicProperties();
+                    properties.Persistent = true;
 
-                    Byte[] body = Encoding.UTF8.GetBytes(message);
-
-                    //消息推送
-                    channel.BasicPublish(exchange: exchangeName, routingKey: routeKeyName, body: body);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Byte[] body = Encoding.UTF8.GetBytes(message + i);
+                        channel.BasicPublish(exchange: exchangeName, routingKey: "", basicProperties: properties, body: body);
+                    }
 
                     Console.WriteLine(" [x] Sent {0}", message);
                 }
@@ -43,6 +43,8 @@ namespace PublishDemo
 
             Console.WriteLine(" Press [enter] to exit.");
             Console.ReadLine();
+
+
         }
     }
 }

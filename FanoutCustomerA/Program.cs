@@ -3,15 +3,13 @@ using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace SubscribeDemo
+namespace FanoutCustomerA
 {
     class Program
     {
         static void Main(string[] args)
         {
-            String queueName = "wytQueue";
             String exchangeName = "wytExchange";
-            String routeKeyName = "wytRouteKey";
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.HostName = "192.168.63.129";
@@ -24,12 +22,11 @@ namespace SubscribeDemo
             {
                 using (IModel channel=connection.CreateModel())
                 {
-                    //声明扇形交换机
-                    channel.ExchangeDeclare(exchange: exchangeName, type: "direct",durable:false,autoDelete:false,arguments:null);
+                    channel.ExchangeDeclare(exchange: exchangeName, type: "fanout", durable: true, autoDelete: false, arguments: null);
 
-                    channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    String queueName = channel.QueueDeclare().QueueName;
 
-                    channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routeKeyName, arguments: null);
+                    channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: "", arguments: null);
 
                     EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
                     consumer.Received += (model, ea) =>
